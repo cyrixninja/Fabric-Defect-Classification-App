@@ -1,5 +1,5 @@
 # Fabric Defect Classification System
-
+![Fabric Defect Web Interface](./screenshots/1.png)
 ## Overview
 This project implements an AI-powered fabric defect classification system that can automatically detect and classify various types of defects in Fabric materials. The system uses deep learning to identify defects such as holes, stains, horizontal and vertical defects, and lines in fabric images.
 
