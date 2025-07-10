@@ -1,0 +1,171 @@
+/cyrixninja/Documents/GitHub/Project/web_app/Fabric-defect-classification/templates/history.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabric Defect Classification App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="bi bi-grid-3x3-gap-fill me-2"></i>
+                <span>Fabric Defect Classifier</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/history">History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- History Section -->
+    <section class="py-5">
+        <div class="container">
+            <h1 class="text-center mb-5">Analysis History</h1>
+            
+            {% if history %}
+                <div class="row">
+                    {% for entry in history|reverse %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card history-card h-100 shadow-sm animated" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ entry.predicted_class|replace('_', ' ')|title }}</h5>
+                                {% if entry.predicted_class == 'defect_free' %}
+                                    <span class="badge bg-success">Pass</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Defect</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex mb-3">
+                                    <img src="{{ url_for('static', filename=entry.image) }}" alt="Fabric sample" class="history-image me-3">
+                                    <div>
+                                        <p class="mb-1"><small class="text-muted">{{ entry.timestamp }}</small></p>
+                                        <div class="mt-1">
+                                            <strong>Confidence:</strong> {{ "%.2f"|format(entry.confidence*100) }}%
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn btn-sm btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#historyModal{{ loop.index }}">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal for each history entry -->
+                    <div class="modal fade" id="historyModal{{ loop.index }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Analysis Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <img src="{{ url_for('static', filename=entry.image) }}" class="img-fluid rounded" alt="Fabric image">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>{{ entry.predicted_class|replace('_', ' ')|title }}</h5>
+                                            <p><small>Analyzed on {{ entry.timestamp }}</small></p>
+                                            <div class="progress mb-3" style="height: 25px;">
+                                                {% if entry.confidence > 0.8 %}
+                                                    <div class="progress-bar bg-success" style="width: {{ entry.confidence*100 }}%">
+                                                        {{ "%.2f"|format(entry.confidence*100) }}%
+                                                    </div>
+                                                {% elif entry.confidence > 0.5 %}
+                                                    <div class="progress-bar bg-warning" style="width: {{ entry.confidence*100 }}%">
+                                                        {{ "%.2f"|format(entry.confidence*100) }}%
+                                                    </div>
+                                                {% else %}
+                                                    <div class="progress-bar bg-danger" style="width: {{ entry.confidence*100 }}%">
+                                                        {{ "%.2f"|format(entry.confidence*100) }}%
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <h6>All Probabilities:</h6>
+                                            <ul class="list-group">
+                                                {% for class_name, prob in entry.probabilities.items() %}
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    {{ class_name|replace('_', ' ')|title }}
+                                                    <span class="badge bg-primary rounded-pill">{{ "%.2f"|format(prob*100) }}%</span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <h3 class="mt-3">No Analysis History</h3>
+                    <p class="text-muted">Upload some Fabric images to see your analysis history here.</p>
+                    <a href="/" class="btn btn-primary mt-3">Analyze Fabric</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Fabric Defect Classification</h5>
+                    <p>An AI-powered tool to detect and classify defects in Fabric manufacturing.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/history">History</a></li>
+                        <li><a href="/about">About</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Technology</h5>
+                    <ul class="list-unstyled">
+                        <li>TensorFlow</li>
+                        <li>Flask</li>
+                        <li>Deep Learning</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2025 Fabric Defect Classification</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
