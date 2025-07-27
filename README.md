@@ -4,8 +4,9 @@
 This project implements an AI-powered fabric defect classification system that can automatically detect and classify various types of defects in Fabric materials. The system uses deep learning to identify defects such as holes, stains, horizontal and vertical defects, and lines in fabric images.
 
 ## Dataset
-The project uses the Fabric Defect Classification dataset available at:
-https://data.mendeley.com/datasets/663j22s43c/3
+We use the publicly available Fabric Defect Classification dataset from:
+
+[Dataset Link (Mendeley)](https://data.mendeley.com/datasets/663j22s43c/3)
 
 The dataset contains images of 6 different classes:
 - Defect free
